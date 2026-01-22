@@ -1,0 +1,191 @@
+/* Claude-Style Loading & Streaming Animations */
+
+/* Smooth fade-in for messages */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Thinking dots animation */
+@keyframes bounce {
+
+    0%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-8px);
+    }
+}
+
+/* Pulse animation for thinking state */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Shimmer effect for loading */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+/* Typing cursor blink */
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Apply animations */
+.message-enter {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+.thinking-dots span {
+    animation: bounce 1.4s infinite ease-in-out;
+}
+
+.thinking-dots span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.thinking-dots span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.thinking-dots span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.streaming-cursor::after {
+    content: '▋';
+    animation: blink 1s infinite;
+    margin-left: 2px;
+}
+
+/* Loading skeleton */
+.loading-skeleton {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* Smooth text reveal */
+.text-reveal {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: reveal 0.5s steps(40) forwards;
+}
+
+@keyframes reveal {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+/* Enhanced thinking animation */
+.thinking-bubble {
+    position: relative;
+    overflow: hidden;
+}
+
+.thinking-bubble::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(59, 130, 246, 0.1),
+            transparent);
+    animation: shimmer 2s infinite;
+}
+
+/* Smooth scroll behavior */
+#chat-messages {
+    scroll-behavior: smooth;
+}
+
+/* Message transition */
+.message-bubble {
+    transition: all 0.2s ease-out;
+}
+
+.message-bubble:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Streaming text effect */
+.streaming-text {
+    display: inline-block;
+    position: relative;
+}
+
+/* Model Select Styling */
+#model-select option {
+    background: #171717;
+    color: #d4d4d4;
+    padding: 8px;
+}
+
+/* Attachment Button Hover effect */
+.attachment-btn {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.attachment-btn:hover {
+    transform: scale(1.1) rotate(-15deg);
+    color: #3b82f6;
+}
+
+.attachment-btn:active {
+    transform: scale(0.95);
+}
+
+/* File Preview Badge Animation */
+.file-badge {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* Shiny CTA Button Update */
+.shiny-cta:active {
+    transform: scale(0.98);
+}

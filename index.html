@@ -1,0 +1,1072 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Looka - AI Assistant</title>
+    <meta name="description" content="Chat with Looka, your intelligent AI assistant. Fast, clean, and private.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Prism for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        if (window.Prism && Prism.plugins && Prism.plugins.autoloader) {
+            Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="animations.css">
+    <style>
+        :root {
+            --font-sans: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+
+        /* Shiny CTA Button CSS */
+        @property --gradient-angle {
+            syntax: "<angle>";
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @property --gradient-angle-offset {
+            syntax: "<angle>";
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @property --gradient-percent {
+            syntax: "<percentage>";
+            initial-value: 20%;
+            inherits: false;
+        }
+
+        @property --gradient-shine {
+            syntax: "<color>";
+            initial-value: #8484ff;
+            inherits: false;
+        }
+
+        .shiny-cta {
+            --gradient-angle: 0deg;
+            --gradient-angle-offset: 0deg;
+            --gradient-percent: 20%;
+            --gradient-shine: #8484ff;
+            --shadow-size: 2px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 9999px;
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            font-weight: 500;
+            color: #ffffff;
+            background: linear-gradient(#000000, #000000) padding-box,
+                conic-gradient(from calc(var(--gradient-angle) - var(--gradient-angle-offset)), transparent 0%, #1d4ed8 5%, var(--gradient-shine) 15%, #1d4ed8 30%, transparent 40%, transparent 100%) border-box;
+            border: 2px solid transparent;
+            box-shadow: inset 0 0 0 1px #1a1818;
+            outline: none;
+            transition: --gradient-angle-offset 800ms cubic-bezier(0.25, 1, 0.5, 1), --gradient-percent 800ms cubic-bezier(0.25, 1, 0.5, 1), --gradient-shine 800ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s;
+            cursor: pointer;
+            isolation: isolate;
+            outline-offset: 4px;
+            font-family: 'Inter', sans-serif;
+            z-index: 0;
+            animation: border-spin 2.5s linear infinite;
+        }
+
+        @keyframes border-spin {
+            to {
+                --gradient-angle: 360deg;
+            }
+        }
+
+        .shiny-cta:active {
+            transform: translateY(1px);
+        }
+
+        .shiny-cta::before {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            --size: calc(100% - 6px);
+            --position: 2px;
+            --space: 4px;
+            width: var(--size);
+            height: var(--size);
+            background: radial-gradient(circle at var(--position) var(--position), white 0.5px, transparent 0) padding-box;
+            background-size: var(--space) var(--space);
+            background-repeat: space;
+            mask-image: conic-gradient(from calc(var(--gradient-angle) + 45deg), black, transparent 10% 90%, black);
+            border-radius: inherit;
+            opacity: 0.4;
+        }
+
+        .shiny-cta::after {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(-50deg, transparent, #1d4ed8, transparent);
+            mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+            opacity: 0.6;
+            animation: shimmer 4s linear infinite;
+        }
+
+        .shiny-cta span {
+            position: relative;
+            z-index: 2;
+            display: inline-block;
+        }
+
+        .shiny-cta span::before {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            --size: calc(100% + 1rem);
+            width: var(--size);
+            height: var(--size);
+            box-shadow: inset 0 -1ex 2rem 4px #1d4ed8;
+            opacity: 0;
+            border-radius: inherit;
+            transition: opacity 800ms cubic-bezier(0.25, 1, 0.5, 1);
+            animation: breathe 4.5s linear infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.20);
+            }
+        }
+
+        /* Utility */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to bottom, #ffffff, #a3a3a3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Code block styling for chat messages */
+        .code-block { border-radius: 8px; overflow: hidden; margin-top: 0.5rem; border: 1px solid rgba(255,255,255,0.06); }
+        .code-header { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 10px; background: rgba(0,0,0,0.35); font-size:12px; color:#cbd5e1; }
+        .code-actions { display:flex; gap:8px; align-items:center }
+        .code-lang { font-weight:600; color:#a3a3ff; margin-right:8px; }
+        .copy-btn { background:transparent; border:1px solid rgba(255,255,255,0.06); color:#cbd5e1; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:12px }
+        .copy-btn:hover { background: rgba(255,255,255,0.02); }
+        pre { margin:0; padding:12px; background: #050507; color:#e6eef8; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace; font-size:13px; overflow:auto; }
+        code.inline-code { background: rgba(255,255,255,0.03); padding:2px 6px; border-radius:6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace; }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-blue-500/30 selection:text-white relative">
+
+    <!-- FLUID CURSOR BACKGROUND -->
+    <canvas id="fluid" class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 opacity-60"></canvas>
+
+    <!-- HEADER -->
+    <header class="fixed top-0 w-full z-50 border-b border-white/5 bg-black/50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <img src="logo.svg" alt="Looka Logo" class="w-7 h-7" />
+                <span class="font-semibold tracking-tight text-sm">LOOKA</span>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
+                <a href="#chat" class="hover:text-white transition-colors">Chat</a>
+                <a href="#features" class="hover:text-white transition-colors">Features</a>
+            </nav>
+
+            <button class="hidden md:block text-sm font-medium text-white hover:text-blue-400 transition-colors"
+                onclick="document.getElementById('chat-input').focus()">
+                Start Chat →
+            </button>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="md:hidden text-neutral-400"
+                onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" aria-label="Open menu">
+                <iconify-icon icon="solar:hamburger-menu-linear" width="1.25rem" height="1.25rem"
+                    style="--iconify-stroke-width:1.5;"></iconify-icon>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu"
+            class="hidden absolute top-16 left-0 w-full bg-neutral-900 border-b border-white/10 p-4 flex flex-col gap-4 md:hidden">
+            <a href="#chat" class="text-neutral-400 hover:text-white">Chat</a>
+            <a href="#features" class="text-neutral-400 hover:text-white">Features</a>
+            <a href="#privacy" class="text-neutral-400 hover:text-white">Privacy</a>
+            <button class="text-blue-400 text-left"
+                onclick="document.getElementById('chat-input').focus(); document.getElementById('mobile-menu').classList.add('hidden');">
+                Start Chat
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <!-- HERO -->
+        <section class="relative pt-40 pb-16 md:pt-48 md:pb-20 px-6">
+            <div class="max-w-4xl mx-auto text-center space-y-8">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-xs font-medium tracking-wide">
+                    <span class="relative flex h-2 w-2">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                    </span>
+                    LOOKA — Fast AI • GLM 4.5 • DeepSeek R1 • Llama 3.3
+                </div>
+
+                <h1 class="text-5xl md:text-7xl font-semibold tracking-tight text-white leading-[1.1]">
+                    Meet Looka — Fast AI
+                    <br>
+                    <span class="text-neutral-500">Powered by GLM 4.5, DeepSeek R1, and Llama 3.3</span>
+                </h1>
+
+                <p class="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto leading-relaxed">
+                    Ask questions, draft messages, or brainstorm ideas — Looka delivers fast, capable responses
+                    across multiple models.
+                </p>
+
+                <div class="flex flex-col md:flex-row items-center justify-center gap-4 pt-4">
+                    <button class="shiny-cta group"
+                        onclick="document.getElementById('chat').scrollIntoView({behavior:'smooth'}); setTimeout(()=>document.getElementById('chat-input').focus(), 350);">
+                        <span class="flex items-center gap-2">
+                            Open Chat
+                            <iconify-icon icon="solar:arrow-right-linear" width="1.1rem" height="1.1rem"
+                                style="--iconify-stroke-width:1.5;"></iconify-icon>
+                        </span>
+                    </button>
+
+                    <button
+                        class="px-6 py-3 rounded-full border border-white/10 text-neutral-300 font-medium hover:bg-white/5 transition-colors flex items-center gap-2"
+                        onclick="resetChat()">
+                        <iconify-icon icon="solar:refresh-linear" width="1.1rem" height="1.1rem"
+                            style="--iconify-stroke-width:1.5;"></iconify-icon>
+                        New Chat
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- BENEFITS -->
+        <section id="benefits" class="py-12 px-6 max-w-7xl mx-auto">
+            <div class="max-w-4xl mx-auto text-center mb-8">
+                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight mb-3">Why Choose Looka?</h2>
+                <p class="text-neutral-400 max-w-2xl mx-auto leading-relaxed">Fast, flexible, and privacy-minded — Looka gives you multiple models, low-latency replies, and configurable privacy controls so you can build the assistant you need.</p>
+            </div>
+
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="glass-card p-6 rounded-xl text-center">
+                    <div class="text-2xl font-semibold text-white mb-2">Speed</div>
+                    <p class="text-sm text-neutral-400">Optimized request flow and streaming responses for low-latency replies.</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl text-center">
+                    <div class="text-2xl font-semibold text-white mb-2">Multi-Model</div>
+                    <p class="text-sm text-neutral-400">Switch between GLM, DeepSeek, and Llama to match quality, cost, and capability.</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl text-center">
+                    <div class="text-2xl font-semibold text-white mb-2">Privacy</div>
+                    <p class="text-sm text-neutral-400">Client-first defaults and optional server-side key storage to protect sensitive data.</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl text-center">
+                    <div class="text-2xl font-semibold text-white mb-2">Extensible</div>
+                    <p class="text-sm text-neutral-400">Easy to add plugins, attach files, generate images, and integrate with backends.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHAT -->
+        <section id="chat" class="py-10 px-6 max-w-7xl mx-auto">
+            <div class="glass-card rounded-2xl border border-white/10 overflow-hidden">
+                <div class="flex flex-col md:flex-row min-h-[32rem]">
+                    <!-- Sidebar -->
+                    <aside class="md:w-80 border-b md:border-b-0 md:border-r border-white/10 bg-black/20 flex flex-col">
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                                        <img src="logo.svg" alt="Looka" class="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold tracking-tight text-white leading-tight">Looka
+                                        </p>
+                                        <p class="text-xs text-neutral-500">AI Assistant</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="createNewChat()"
+                                class="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-blue-500/10 hover:bg-blue-500/20 text-white font-medium text-sm transition-colors flex items-center justify-center gap-2">
+                                <iconify-icon icon="solar:add-circle-linear" width="1.1rem"
+                                    height="1.1rem"></iconify-icon>
+                                New Chat
+                            </button>
+
+                            <div class="flex items-center justify-between text-xs text-neutral-500 pt-2">
+                                <span class="font-medium">Chat History</span>
+                                <span class="text-neutral-600">Auto-deletes in 7 days</span>
+                            </div>
+                        </div>
+
+                        <!-- Chat History List -->
+                        <div id="chat-history" class="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
+                            <p class="text-xs text-neutral-600 text-center py-8">Loading chats...</p>
+                        </div>
+
+                        <div class="p-4 border-t border-white/10">
+                            <div class="flex items-center justify-between gap-3 text-xs text-neutral-500">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                                    Ready
+                                </div>
+                                <button class="text-neutral-400 hover:text-white transition-colors"
+                                    onclick="resetChat()">Clear</button>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Chat pane -->
+                    <div class="flex-1 flex flex-col">
+                        <div class="px-6 py-4 border-b border-white/10 bg-black/10 flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-sm text-neutral-300">
+                                <iconify-icon icon="solar:shield-check-linear" width="1.1rem" height="1.1rem"
+                                    style="--iconify-stroke-width:1.5;"></iconify-icon>
+                                <span class="font-medium">Looka AI</span>
+                                <span class="text-neutral-600">•</span>
+                                <span class="text-neutral-500 text-xs">Secure & Private</span>
+                            </div>
+
+                            <button
+                                class="hidden sm:inline-flex items-center gap-2 text-xs font-medium text-neutral-300 hover:text-white transition-colors"
+                                onclick="downloadChat()">
+                                <iconify-icon icon="solar:download-linear" width="1.05rem" height="1.05rem"
+                                    style="--iconify-stroke-width:1.5;"></iconify-icon>
+                                Export
+                            </button>
+                        </div>
+
+                        <div id="chat-messages" class="flex-1 p-6 space-y-4 overflow-y-auto">
+                            <!-- Seed message -->
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
+                                    <img src="logo.svg" alt="Looka" class="w-5 h-5" />
+                                </div>
+                                <div class="max-w-2xl">
+                                    <div class="glass-card rounded-2xl px-4 py-3">
+                                        <p class="text-sm text-neutral-200 leading-relaxed">
+                                            Hi — I'm Looka, your AI assistant. Ask me anything, upload files, or
+                                            generate images!
+                                        </p>
+                                    </div>
+                                    <p class="text-xs text-neutral-600 mt-2">Looka • just now</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 md:p-6 border-t border-white/10 bg-black/10">
+                            <form id="chat-form" class="flex items-end gap-3" onsubmit="sendMessage(event)">
+                                <div class="flex-1">
+                                    <label for="chat-input" class="sr-only">Message</label>
+                                    <input type="file" id="file-input" class="hidden"
+                                        accept="image/*,.pdf,.doc,.docx,.txt" multiple />
+                                    <div
+                                        class="rounded-2xl border border-white/10 bg-black/40 focus-within:border-blue-500/30 transition-colors">
+                                        <div id="file-preview" class="hidden px-4 pt-3 flex flex-wrap gap-2"></div>
+                                        <div class="flex items-end gap-3 px-4 py-3">
+                                            <textarea id="chat-input" rows="1"
+                                                class="flex-1 bg-transparent text-sm text-white placeholder:text-neutral-500 outline-none resize-none leading-relaxed"
+                                                placeholder="Type your message..."></textarea>
+                                        </div>
+                                        <div class="px-4 pb-3 flex items-center justify-between">
+                                            <p class="text-xs text-neutral-600">Enter to send • Shift+Enter for new line
+                                            </p>
+                                            <p id="typing" class="text-xs text-blue-400 hidden flex items-center gap-2">
+                                                <span class="flex gap-1">
+                                                    <span
+                                                        class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></span>
+                                                    <span class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"
+                                                        style="animation-delay: 0.1s"></span>
+                                                    <span class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"
+                                                        style="animation-delay: 0.2s"></span>
+                                                </span>
+                                                Looka is thinking...
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <button id="attach-btn" type="button" onclick="document.getElementById('file-input').click()"
+                                        class="w-10 h-[42px] flex items-center justify-center bg-white/5 border border-white/10 rounded-xl text-neutral-400 hover:text-blue-400 hover:border-blue-500/30 transition-all attachment-btn"
+                                        title="Attach Files">
+                                        <iconify-icon icon="solar:paperclip-linear" width="1.2rem" height="1.2rem"
+                                            style="--iconify-stroke-width:1.5;"></iconify-icon>
+                                    </button>
+
+                                    <button id="generate-image-btn" type="button" onclick="generateImage()"
+                                        class="w-10 h-[42px] flex items-center justify-center bg-white/5 border border-white/10 rounded-xl text-neutral-400 hover:text-blue-400 hover:border-blue-500/30 transition-all attachment-btn"
+                                        title="Generate Image">
+                                        <iconify-icon icon="solar:gallery-add-linear" width="1.2rem" height="1.2rem"
+                                            style="--iconify-stroke-width:1.5;"></iconify-icon>
+                                    </button>
+
+                                    <select id="model-select"
+                                        class="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-neutral-300 outline-none focus:border-blue-500/30 transition-colors cursor-pointer appearance-none pr-8 relative h-[42px] min-w-[100px]"
+                                        style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239CA3AF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 0.8rem top 50%; background-size: 0.65rem auto;">
+                                        <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3</option>
+                                        <option value="z-ai/glm-4.5-air:free">GLM 4.5</option>
+                                        <option value="deepseek/deepseek-r1-0528:free">DeepSeek R1</option>
+                                        <option value="meta-llama/llama-3.1-405b-instruct:free">Llama 3.1</option>
+                                        <option value="qwen/qwen3-4b:free">Qwen 3</option>
+                                        <option value="mistralai/mistral-small-3.1-24b-instruct:free">Mistral Small</option>
+                                        <option value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2</option>
+                                        <option value="google/gemma-3-4b-it:free">Gemma 3</option>
+                                    </select>
+
+                                    <button type="submit" class="shiny-cta h-[42px] px-5">
+                                        <span class="flex items-center gap-2">
+                                            Send
+                                            <iconify-icon icon="solar:plain-2-linear" width="1.1rem" height="1.1rem"
+                                                style="--iconify-stroke-width:1.5;"></iconify-icon>
+                                        </span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section id="features" class="py-20 px-6 max-w-7xl mx-auto">
+            <div class="mb-12">
+                <h2 class="text-3xl md:text-4xl font-semibold tracking-tight mb-4">What This Chat Includes</h2>
+                <p class="text-neutral-400 max-w-xl">A simple chat UI foundation you can connect to your preferred
+                    model/API.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="glass-card p-8 rounded-xl">
+                    <div
+                        class="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6">
+                        <iconify-icon icon="solar:chat-round-line-linear" width="1.25rem" height="1.25rem"
+                            style="--iconify-stroke-width:1.5;"></iconify-icon>
+                    </div>
+                    <h3 class="text-xl font-medium mb-3">Conversation UI</h3>
+                    <p class="text-neutral-400 text-sm leading-relaxed">Bubbles, timestamps, auto-scroll, and
+                        keyboard-friendly input behavior.</p>
+                </div>
+
+                <div class="glass-card p-8 rounded-xl">
+                    <div
+                        class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400 mb-6">
+                        <iconify-icon icon="solar:lock-keyhole-linear" width="1.25rem" height="1.25rem"
+                            style="--iconify-stroke-width:1.5;"></iconify-icon>
+                    </div>
+                    <h3 class="text-xl font-medium mb-3">Local by Default</h3>
+                    <p class="text-neutral-400 text-sm leading-relaxed">Messages are stored only in memory on this page
+                        unless you wire it to a backend.</p>
+                </div>
+
+                <div class="glass-card p-8 rounded-xl">
+                    <div
+                        class="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6">
+                        <iconify-icon icon="solar:document-text-linear" width="1.25rem" height="1.25rem"
+                            style="--iconify-stroke-width:1.5;"></iconify-icon>
+                    </div>
+                    <h3 class="text-xl font-medium mb-3">Export Chat</h3>
+                    <p class="text-neutral-400 text-sm leading-relaxed">Download the conversation as a text file for
+                        review or sharing.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRIVACY -->
+        <section id="privacy" class="py-20 border-y border-white/5 bg-black/20">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="max-w-3xl">
+                        
+                    </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="py-28 px-6 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-blue-900/10 blur-3xl rounded-full -z-10 transform scale-50"></div>
+            <div class="max-w-2xl mx-auto space-y-8">
+                <h2 class="text-4xl md:text-5xl font-semibold tracking-tight text-white">
+                    Want this connected to a real AI?
+                </h2>
+                <p class="text-lg text-neutral-400">
+                    This UI can connect to real AI models. I can help wire server-side key storage, authentication,
+                    per-user memory, and privacy controls so you can run models securely.
+                </p>
+                <div class="flex justify-center pt-4">
+                    <button class="shiny-cta"
+                        onclick="document.getElementById('chat').scrollIntoView({behavior:'smooth'}); setTimeout(()=>document.getElementById('chat-input').focus(), 350);">
+                        <span>Chat Now</span>
+                    </button>
+                </div>
+                <p class="text-xs text-neutral-600 mt-8">Assistant • configurable model backends • enable live models safely</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/5 py-12 bg-black">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-sm text-neutral-500">
+                © 2026. All rights reserved by Looka.
+            </div>
+            <div class="flex gap-8 text-sm font-medium text-neutral-400">
+                <a href="#chat" class="hover:text-white">Chat</a>
+                <a href="#features" class="hover:text-white">Features</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Load configuration (API keys) -->
+    <script src="config.js"></script>
+
+    <!-- Load chat history script -->
+    <script src="chat-history.js"></script>
+
+    <!-- Load complete integration (ALL features) -->
+    <script src="complete-integration.js"></script>
+
+    <!-- FLUID SIMULATION SCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('fluid');
+
+            let config = {
+                SIM_RESOLUTION: 128,
+                DYE_RESOLUTION: 1024,
+                CAPTURE_RESOLUTION: 512,
+                DENSITY_DISSIPATION: 1,
+                VELOCITY_DISSIPATION: 0.2,
+                PRESSURE: 0.8,
+                PRESSURE_ITERATIONS: 20,
+                CURL: 30,
+                SPLAT_RADIUS: 0.25,
+                SPLAT_FORCE: 6000,
+                SHADING: true,
+                COLOR_UPDATE_SPEED: 10,
+                PAUSED: false,
+                BACK_COLOR: { r: 0, g: 0, b: 0 },
+                TRANSPARENT: true,
+            };
+
+            function getWebGLContext(canvas) {
+                const params = { alpha: true, depth: false, stencil: false, antialias: false, preserveDrawingBuffer: false };
+                let gl = canvas.getContext('webgl2', params);
+                const isWebGL2 = !!gl;
+                if (!isWebGL2) gl = canvas.getContext('webgl', params) || canvas.getContext('experimental-webgl', params);
+
+                let halfFloat;
+                let supportLinearFiltering;
+
+                if (isWebGL2) {
+                    gl.getExtension('EXT_color_buffer_float');
+                    supportLinearFiltering = gl.getExtension('OES_texture_float_linear');
+                } else {
+                    halfFloat = gl.getExtension('OES_texture_half_float');
+                    supportLinearFiltering = gl.getExtension('OES_texture_half_float_linear');
+                }
+
+                gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+                const halfFloatTexType = isWebGL2 ? gl.HALF_FLOAT : (halfFloat && halfFloat.HALF_FLOAT_OES) || gl.FLOAT;
+
+                return { gl, ext: { halfFloatTexType, supportLinearFiltering } };
+            }
+
+            const { gl, ext } = getWebGLContext(canvas);
+
+            function createShader(type, source) {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(shader);
+                return shader;
+            }
+
+            function createProgram(vsSource, fsSource) {
+                const program = gl.createProgram();
+                gl.attachShader(program, createShader(gl.VERTEX_SHADER, vsSource));
+                gl.attachShader(program, createShader(gl.FRAGMENT_SHADER, fsSource));
+                gl.linkProgram(program);
+                if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw gl.getProgramInfoLog(program);
+                return program;
+            }
+
+            const baseVertexShader = `
+        precision highp float;
+        attribute vec2 aPosition;
+        varying vec2 vUv;
+        varying vec2 vL;
+        varying vec2 vR;
+        varying vec2 vT;
+        varying vec2 vB;
+        uniform vec2 texelSize;
+        void main () {
+          vUv = aPosition * 0.5 + 0.5;
+          vL = vUv - vec2(texelSize.x, 0.0);
+          vR = vUv + vec2(texelSize.x, 0.0);
+          vT = vUv + vec2(0.0, texelSize.y);
+          vB = vUv - vec2(0.0, texelSize.y);
+          gl_Position = vec4(aPosition, 0.0, 1.0);
+        }
+      `;
+
+            const clearShader = `
+        precision mediump float;
+        precision mediump sampler2D;
+        varying highp vec2 vUv;
+        uniform sampler2D uTexture;
+        uniform float value;
+        void main () { gl_FragColor = value * texture2D(uTexture, vUv); }
+      `;
+
+            const displayShaderSource = `
+        precision highp float;
+        precision highp sampler2D;
+        varying vec2 vUv;
+        uniform sampler2D uTexture;
+        void main () {
+          vec3 c = texture2D(uTexture, vUv).rgb;
+          float a = max(c.r, max(c.g, c.b));
+          gl_FragColor = vec4(c, a);
+        }
+      `;
+
+            const splatShader = `
+        precision highp float;
+        precision highp sampler2D;
+        varying vec2 vUv;
+        uniform sampler2D uTarget;
+        uniform float aspectRatio;
+        uniform vec3 color;
+        uniform vec2 point;
+        uniform float radius;
+        void main () {
+          vec2 p = vUv - point.xy;
+          p.x *= aspectRatio;
+          vec3 splat = exp(-dot(p, p) / radius) * color;
+          vec3 base = texture2D(uTarget, vUv).xyz;
+          gl_FragColor = vec4(base + splat, 1.0);
+        }
+      `;
+
+            const advectionShader = `
+        precision highp float;
+        precision highp sampler2D;
+        varying vec2 vUv;
+        uniform sampler2D uVelocity;
+        uniform sampler2D uSource;
+        uniform vec2 texelSize;
+        uniform float dt;
+        uniform float dissipation;
+        void main () {
+          vec2 coord = vUv - dt * texture2D(uVelocity, vUv).xy * texelSize;
+          vec4 result = texture2D(uSource, coord);
+          float decay = 1.0 + dissipation * dt;
+          gl_FragColor = result / decay;
+        }
+      `;
+
+            const divergenceShader = `
+        precision mediump float;
+        precision mediump sampler2D;
+        varying highp vec2 vUv;
+        varying highp vec2 vL;
+        varying highp vec2 vR;
+        varying highp vec2 vT;
+        varying highp vec2 vB;
+        uniform sampler2D uVelocity;
+        void main () {
+          float L = texture2D(uVelocity, vL).x;
+          float R = texture2D(uVelocity, vR).x;
+          float T = texture2D(uVelocity, vT).y;
+          float B = texture2D(uVelocity, vB).y;
+          vec2 C = texture2D(uVelocity, vUv).xy;
+          if (vL.x < 0.0) { L = -C.x; }
+          if (vR.x > 1.0) { R = -C.x; }
+          if (vT.y > 1.0) { T = -C.y; }
+          if (vB.y < 0.0) { B = -C.y; }
+          float div = 0.5 * (R - L + T - B);
+          gl_FragColor = vec4(div, 0.0, 0.0, 1.0);
+        }
+      `;
+
+            const curlShader = `
+        precision mediump float;
+        precision mediump sampler2D;
+        varying highp vec2 vUv;
+        varying highp vec2 vL;
+        varying highp vec2 vR;
+        varying highp vec2 vT;
+        varying highp vec2 vB;
+        uniform sampler2D uVelocity;
+        void main () {
+          float L = texture2D(uVelocity, vL).y;
+          float R = texture2D(uVelocity, vR).y;
+          float T = texture2D(uVelocity, vT).x;
+          float B = texture2D(uVelocity, vB).x;
+          float vorticity = R - L - T + B;
+          gl_FragColor = vec4(0.5 * vorticity, 0.0, 0.0, 1.0);
+        }
+      `;
+
+            const vorticityShader = `
+        precision highp float;
+        precision highp sampler2D;
+        varying vec2 vUv;
+        varying vec2 vL;
+        varying vec2 vR;
+        varying vec2 vT;
+        varying vec2 vB;
+        uniform sampler2D uVelocity;
+        uniform sampler2D uCurl;
+        uniform float curl;
+        uniform float dt;
+        void main () {
+          float L = texture2D(uCurl, vL).x;
+          float R = texture2D(uCurl, vR).x;
+          float T = texture2D(uCurl, vT).x;
+          float B = texture2D(uCurl, vB).x;
+          float C = texture2D(uCurl, vUv).x;
+          vec2 force = 0.5 * vec2(abs(T) - abs(B), abs(R) - abs(L));
+          force /= length(force) + 0.0001;
+          force *= curl * C;
+          force.y *= -1.0;
+          vec2 velocity = texture2D(uVelocity, vUv).xy;
+          velocity += force * dt;
+          velocity = min(max(velocity, -1000.0), 1000.0);
+          gl_FragColor = vec4(velocity, 0.0, 1.0);
+        }
+      `;
+
+            const pressureShader = `
+        precision mediump float;
+        precision mediump sampler2D;
+        varying highp vec2 vUv;
+        varying highp vec2 vL;
+        varying highp vec2 vR;
+        varying highp vec2 vT;
+        varying highp vec2 vB;
+        uniform sampler2D uPressure;
+        uniform sampler2D uDivergence;
+        void main () {
+          float L = texture2D(uPressure, vL).x;
+          float R = texture2D(uPressure, vR).x;
+          float T = texture2D(uPressure, vT).x;
+          float B = texture2D(uPressure, vB).x;
+          float divergence = texture2D(uDivergence, vUv).x;
+          float pressure = (L + R + B + T - divergence) * 0.25;
+          gl_FragColor = vec4(pressure, 0.0, 0.0, 1.0);
+        }
+      `;
+
+            const gradientSubtractShader = `
+        precision mediump float;
+        precision mediump sampler2D;
+        varying highp vec2 vUv;
+        varying highp vec2 vL;
+        varying highp vec2 vR;
+        varying highp vec2 vT;
+        varying highp vec2 vB;
+        uniform sampler2D uPressure;
+        uniform sampler2D uVelocity;
+        void main () {
+          float L = texture2D(uPressure, vL).x;
+          float R = texture2D(uPressure, vR).x;
+          float T = texture2D(uPressure, vT).x;
+          float B = texture2D(uPressure, vB).x;
+          vec2 velocity = texture2D(uVelocity, vUv).xy;
+          velocity.xy -= vec2(R - L, T - B);
+          gl_FragColor = vec4(velocity, 0.0, 1.0);
+        }
+      `;
+
+            const splatProgram = createProgram(baseVertexShader, splatShader);
+            const curlProgram = createProgram(baseVertexShader, curlShader);
+            const vorticityProgram = createProgram(baseVertexShader, vorticityShader);
+            const divergenceProgram = createProgram(baseVertexShader, divergenceShader);
+            const clearProgram = createProgram(baseVertexShader, clearShader);
+            const pressureProgram = createProgram(baseVertexShader, pressureShader);
+            const gradientSubtractProgram = createProgram(baseVertexShader, gradientSubtractShader);
+            const advectionProgram = createProgram(baseVertexShader, advectionShader);
+            const displayProgram = createProgram(baseVertexShader, displayShaderSource);
+
+            function getUniforms(program) {
+                let uniforms = {};
+                let uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+                for (let i = 0; i < uniformCount; i++) {
+                    let uniformName = gl.getActiveUniform(program, i).name;
+                    uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
+                }
+                return uniforms;
+            }
+
+            [splatProgram, curlProgram, vorticityProgram, divergenceProgram, clearProgram, pressureProgram, gradientSubtractProgram, advectionProgram, displayProgram]
+                .forEach(p => p.uniforms = getUniforms(p));
+
+            function createFBO(w, h, internalFormat, format, type, param) {
+                gl.activeTexture(gl.TEXTURE0);
+                let texture = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, param);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, param);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, w, h, 0, format, type, null);
+
+                let fbo = gl.createFramebuffer();
+                gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+                gl.viewport(0, 0, w, h);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+
+                return { texture, fbo, width: w, height: h, texelSizeX: 1.0 / w, texelSizeY: 1.0 / h, attach: (id) => { gl.activeTexture(gl.TEXTURE0 + id); gl.bindTexture(gl.TEXTURE_2D, texture); return id; } };
+            }
+
+            function createDoubleFBO(w, h, internalFormat, format, type, param) {
+                let fbo1 = createFBO(w, h, internalFormat, format, type, param);
+                let fbo2 = createFBO(w, h, internalFormat, format, type, param);
+                return {
+                    width: w, height: h, texelSizeX: fbo1.texelSizeX, texelSizeY: fbo1.texelSizeY,
+                    get read() { return fbo1; }, set read(value) { fbo1 = value; },
+                    get write() { return fbo2; }, set write(value) { fbo2 = value; },
+                    swap() { let temp = fbo1; fbo1 = fbo2; fbo2 = temp; }
+                };
+            }
+
+            let dye, velocity, divergence, curl, pressure;
+
+            function getResolution(resolution) {
+                let aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight;
+                if (aspectRatio < 1) aspectRatio = 1.0 / aspectRatio;
+                let min = Math.round(resolution);
+                let max = Math.round(resolution * aspectRatio);
+                if (gl.drawingBufferWidth > gl.drawingBufferHeight) return { width: max, height: min };
+                else return { width: min, height: max };
+            }
+
+            function initFramebuffers() {
+                let simRes = getResolution(config.SIM_RESOLUTION);
+                let dyeRes = getResolution(config.DYE_RESOLUTION);
+                const texType = ext.halfFloatTexType;
+
+                const formatRGBA = { internalFormat: gl.RGBA16F || gl.RGBA, format: gl.RGBA };
+                const formatRG = { internalFormat: gl.RG16F || gl.RGBA, format: gl.RG || gl.RGBA };
+                const formatR = { internalFormat: gl.R16F || gl.RGBA, format: gl.RED || gl.RGBA };
+
+                dye = createDoubleFBO(dyeRes.width, dyeRes.height, formatRGBA.internalFormat, formatRGBA.format, texType, gl.LINEAR);
+                velocity = createDoubleFBO(simRes.width, simRes.height, formatRG.internalFormat, formatRG.format, texType, gl.LINEAR);
+                divergence = createFBO(simRes.width, simRes.height, formatR.internalFormat, formatR.format, texType, gl.NEAREST);
+                curl = createFBO(simRes.width, simRes.height, formatR.internalFormat, formatR.format, texType, gl.NEAREST);
+                pressure = createDoubleFBO(simRes.width, simRes.height, formatR.internalFormat, formatR.format, texType, gl.NEAREST);
+            }
+
+            function blit(target) {
+                if (target == null) {
+                    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+                } else {
+                    gl.viewport(0, 0, target.width, target.height);
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, target.fbo);
+                }
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]), gl.STATIC_DRAW);
+            gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(0);
+
+            function resizeCanvas() {
+                let width = window.innerWidth;
+                let height = window.innerHeight;
+                if (canvas.width !== width || canvas.height !== height) {
+                    canvas.width = width;
+                    canvas.height = height;
+                    initFramebuffers();
+                }
+            }
+
+            function splat(x, y, dx, dy, color) {
+                gl.useProgram(splatProgram);
+                gl.uniform1i(splatProgram.uniforms.uTarget, velocity.read.attach(0));
+                gl.uniform1f(splatProgram.uniforms.aspectRatio, canvas.width / canvas.height);
+                gl.uniform2f(splatProgram.uniforms.point, x / canvas.width, 1.0 - y / canvas.height);
+                gl.uniform3f(splatProgram.uniforms.color, dx, dy, 0.0);
+                gl.uniform1f(splatProgram.uniforms.radius, config.SPLAT_RADIUS / 100.0);
+                blit(velocity.write);
+                velocity.swap();
+
+                gl.uniform1i(splatProgram.uniforms.uTarget, dye.read.attach(0));
+                gl.uniform3f(splatProgram.uniforms.color, color.r, color.g, color.b);
+                blit(dye.write);
+                dye.swap();
+            }
+
+            let lastUpdateTime = Date.now();
+
+            function update() {
+                resizeCanvas();
+                const dt = Math.min((Date.now() - lastUpdateTime) / 1000, 0.016);
+                lastUpdateTime = Date.now();
+
+                gl.disable(gl.BLEND);
+
+                gl.useProgram(curlProgram);
+                gl.uniform2f(curlProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+                gl.uniform1i(curlProgram.uniforms.uVelocity, velocity.read.attach(0));
+                blit(curl);
+
+                gl.useProgram(vorticityProgram);
+                gl.uniform2f(vorticityProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+                gl.uniform1i(vorticityProgram.uniforms.uVelocity, velocity.read.attach(0));
+                gl.uniform1i(vorticityProgram.uniforms.uCurl, curl.attach(1));
+                gl.uniform1f(vorticityProgram.uniforms.curl, config.CURL);
+                gl.uniform1f(vorticityProgram.uniforms.dt, dt);
+                blit(velocity.write);
+                velocity.swap();
+
+                gl.useProgram(divergenceProgram);
+                gl.uniform2f(divergenceProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+                gl.uniform1i(divergenceProgram.uniforms.uVelocity, velocity.read.attach(0));
+                blit(divergence);
+
+                gl.useProgram(clearProgram);
+                gl.uniform1i(clearProgram.uniforms.uTexture, pressure.read.attach(0));
+                gl.uniform1f(clearProgram.uniforms.value, config.PRESSURE);
+                blit(pressure.write);
+                pressure.swap();
+
+                gl.useProgram(pressureProgram);
+                gl.uniform2f(pressureProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+                gl.uniform1i(pressureProgram.uniforms.uDivergence, divergence.attach(0));
+                for (let i = 0; i < config.PRESSURE_ITERATIONS; i++) {
+                    gl.uniform1i(pressureProgram.uniforms.uPressure, pressure.read.attach(1));
+                    blit(pressure.write);
+                    pressure.swap();
+                }
+
+                gl.useProgram(gradientSubtractProgram);
+                gl.uniform2f(gradientSubtractProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+                gl.uniform1i(gradientSubtractProgram.uniforms.uPressure, pressure.read.attach(0));
+                gl.uniform1i(gradientSubtractProgram.uniforms.uVelocity, velocity.read.attach(1));
+                blit(velocity.write);
+                velocity.swap();
+
+                gl.useProgram(advectionProgram);
+                gl.uniform2f(advectionProgram.uniforms.texelSize, velocity.texelSizeX, velocity.texelSizeY);
+                let velocityId = velocity.read.attach(0);
+                gl.uniform1i(advectionProgram.uniforms.uVelocity, velocityId);
+                gl.uniform1i(advectionProgram.uniforms.uSource, velocityId);
+                gl.uniform1f(advectionProgram.uniforms.dt, dt);
+                gl.uniform1f(advectionProgram.uniforms.dissipation, config.VELOCITY_DISSIPATION);
+                blit(velocity.write);
+                velocity.swap();
+
+                gl.uniform1i(advectionProgram.uniforms.uVelocity, velocity.read.attach(0));
+                gl.uniform1i(advectionProgram.uniforms.uSource, dye.read.attach(1));
+                gl.uniform1f(advectionProgram.uniforms.dissipation, config.DENSITY_DISSIPATION);
+                blit(dye.write);
+                dye.swap();
+
+                gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+                gl.useProgram(displayProgram);
+                gl.uniform1i(displayProgram.uniforms.uTexture, dye.read.attach(0));
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+                requestAnimationFrame(update);
+            }
+
+            initFramebuffers();
+            update();
+
+            window.addEventListener('mousemove', e => {
+                splat(e.clientX, e.clientY, e.movementX * 10, -e.movementY * 10, { r: 0.2, g: 0.4, b: 1.0 });
+            });
+
+            window.addEventListener('touchmove', e => {
+                const t = e.touches[0];
+                splat(t.clientX, t.clientY, 10, 10, { r: 0.2, g: 0.4, b: 1.0 });
+            }, { passive: true });
+
+            splat(window.innerWidth / 2, window.innerHeight / 2, 0, -20, { r: 0.5, g: 0.5, b: 0.5 });
+        });
+    </script>
+
+</body>
+
+</html>
