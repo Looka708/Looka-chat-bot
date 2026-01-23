@@ -17,6 +17,13 @@
             Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
         }
     </script>
+    <!-- Load Prettier (for client-side code pretty-printing) -->
+    <script src="https://unpkg.com/prettier@2.8.8/standalone.js"></script>
+    <script src="https://unpkg.com/prettier@2.8.8/parser-babel.js"></script>
+    <script src="https://unpkg.com/prettier@2.8.8/parser-typescript.js"></script>
+    <script src="https://unpkg.com/prettier@2.8.8/parser-postcss.js"></script>
+    <script src="https://unpkg.com/prettier@2.8.8/parser-html.js"></script>
+    <script src="https://unpkg.com/prettier@2.8.8/parser-markdown.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
@@ -1066,7 +1073,10 @@
             splat(window.innerWidth / 2, window.innerHeight / 2, 0, -20, { r: 0.5, g: 0.5, b: 0.5 });
         });
     </script>
-
+<!-- Existing app scripts -->
+<script src="config.js"></script>
+<script src="chat-history.js"></script>
+<script src="complete-integration.js"></script>
 </body>
 
 </html>
