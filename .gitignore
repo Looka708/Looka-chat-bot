@@ -1,5 +1,7 @@
-# Ignore config.js with API keys
+# Ignore local config.js with API keys (for development)
 config.js
+# But allow production config (no API keys)
+!config.production.js
 
 # Environment files
 .env
