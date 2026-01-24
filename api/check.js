@@ -1,26 +1,17 @@
-// Diagnostic endpoint to check if environment variable is set
-// Visit /api/check to see if OPENROUTER_API_KEY is configured
-
+// Deep Diagnostic endpoint
 module.exports = async function handler(req, res) {
-    // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
+    const allKeys = Object.keys(process.env);
+    const openRouterKeys = allKeys.filter(k => k.toLowerCase().includes('openrouter'));
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
-
-    // Don't expose the actual key, just check if it exists
-    const status = {
-        environmentVariableSet: !!apiKey,
-        keyLength: apiKey ? apiKey.length : 0,
-        keyPrefix: apiKey ? apiKey.substring(0, 10) + '...' : 'NOT SET',
-        allEnvVars: Object.keys(process.env).filter(k => k.includes('OPENROUTER') || k.includes('SUPABASE')),
+    return res.status(200).json({
+        status: "Scanning Environment...",
+        environmentVariableSet: !!process.env.OPENROUTER_API_KEY,
+        foundOpenRouterKeys: openRouterKeys,
+        allAvailableEnvVars: allKeys.filter(k => !k.includes('VERCEL') && !k.includes('AWS')), // Filter noise
+        nodeVersion: process.version,
+        tip: "If foundOpenRouterKeys is empty, the variable is missing from Vercel Settings -> Environment Variables.",
         timestamp: new Date().toISOString()
-    };
-
-    return res.status(200).json(status);
+    });
 };
