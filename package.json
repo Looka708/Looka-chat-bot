@@ -1,0 +1,22 @@
+{
+    "name": "looka-ai-chatbot",
+    "version": "1.0.0",
+    "description": "A modern, feature-rich AI chatbot powered by GLM 4.5 Air, DeepSeek R1, and Llama 3.3",
+    "main": "index.html",
+    "scripts": {
+        "dev": "vercel dev",
+        "deploy": "vercel --prod"
+    },
+    "keywords": [
+        "ai",
+        "chatbot",
+        "openrouter",
+        "supabase",
+        "vercel"
+    ],
+    "author": "Muhammad Umer",
+    "license": "MIT",
+    "dependencies": {
+        "node-fetch": "^2.6.7"
+    }
+}

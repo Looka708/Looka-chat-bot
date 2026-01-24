@@ -1,0 +1,11 @@
+# Vercel ignore file
+.env.local
+.env
+config.js
+node_modules
+.git
+.vscode
+.idea
+*.log
+.DS_Store
+Thumbs.db
