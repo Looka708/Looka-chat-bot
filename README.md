@@ -504,7 +504,7 @@ copies or substantial portions of the Software.
 
 <div align="center">
 
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/looka-ai&type=Date)](https://star-history.com/#yourusername/looka-ai&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=Looka708/Looka-chat-bot&type=Date)](https://star-history.com/#Looka708/Looka-chat-bot&Date)
 
 </div>
 
