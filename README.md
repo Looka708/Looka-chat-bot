@@ -85,8 +85,8 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/looka-ai.git
-cd looka-ai
+git clone https://github.com/Looka708/Looka-chat-bot
+cd Looka-chat-bot
 
 # 2. Copy environment variables
 cp .env.example .env.local
