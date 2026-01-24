@@ -75,7 +75,7 @@ function tryPrettyPrintFallback(language, code) {
 
     // JSON
     if (lang === 'json') {
-        try { return JSON.stringify(JSON.parse(code), null, 2); } catch (e) {}
+        try { return JSON.stringify(JSON.parse(code), null, 2); } catch (e) { }
     }
 
     // HTML / XML
@@ -91,7 +91,7 @@ function tryPrettyPrintFallback(language, code) {
                 if (/^<\w[^>]*[^\/]>$/.test(line) && !/^<!(?:--)/.test(line)) indent++;
             });
             return out.join('\n');
-        } catch (e) {}
+        } catch (e) { }
     }
 
     // CSS
@@ -107,7 +107,7 @@ function tryPrettyPrintFallback(language, code) {
                 if (line.endsWith('{')) indent++;
             });
             return out.join('\n');
-        } catch (e) {}
+        } catch (e) { }
     }
 
     // JS/TS heuristic
@@ -124,7 +124,7 @@ function tryPrettyPrintFallback(language, code) {
                 if (line.endsWith('{')) indent++;
             });
             return out.join('\n');
-        } catch (e) {}
+        } catch (e) { }
     }
 
     // fallback long single-line split
@@ -489,7 +489,7 @@ async function renderMessage(role, content, ts) {
     } else {
         formattedContent = formatMessageContent(content) || `<p class="text-sm ${isUser ? 'text-white' : 'text-neutral-200'} leading-relaxed whitespace-pre-wrap">${escapeHtml(content)}</p>`;
     }
-    
+
     bubble.innerHTML = formattedContent;
 
     const meta = document.createElement('p');
@@ -763,8 +763,10 @@ async function sendMessage(e) {
         const useProxy = !!window.CONFIG?.USE_PROXY;
         const proxyUrl = window.CONFIG?.PROXY_URL || '/api/proxy';
 
-        // If using proxy, client shouldn't send Authorization header — server uses env var
-        const apiKey = getApiKey(selectedModel);
+        console.log('🔧 Debug Info:', { useProxy, proxyUrl, selectedModel });
+
+        // If using proxy, client doesn't need API key — server handles it
+        const apiKey = useProxy ? null : getApiKey(selectedModel);
 
         if (!useProxy && !apiKey) {
             hideThinkingAnimation();
@@ -776,6 +778,7 @@ async function sendMessage(e) {
             await renderMessage("assistant", msg, ts);
             return;
         }
+
 
         const body = JSON.stringify({
             model: selectedModel,
@@ -796,11 +799,14 @@ async function sendMessage(e) {
             body
         };
 
+        // Only add Authorization header if NOT using proxy
         if (!useProxy && apiKey) {
             fetchOptions.headers['Authorization'] = `Bearer ${apiKey}`;
         }
 
         const endpoint = useProxy ? proxyUrl : 'https://openrouter.ai/api/v1/chat/completions';
+
+        console.log('🚀 Making request to:', endpoint, 'with proxy:', useProxy);
 
         const response = await fetch(endpoint, fetchOptions);
 
@@ -853,7 +859,7 @@ async function sendMessage(e) {
                 const parsed = JSON.parse(buffer.trim().slice(6));
                 const content = parsed.choices?.[0]?.delta?.content || parsed.choices?.[0]?.message?.content || parsed.choices?.[0]?.text || "";
                 fullReply += content;
-            } catch (e) {}
+            } catch (e) { }
         }
 
         removeStreamingBubble();
@@ -891,7 +897,7 @@ function getModelCapabilities(model) {
         if (window.CONFIG && window.CONFIG.MODEL_CAPABILITIES) {
             return window.CONFIG.MODEL_CAPABILITIES[model] || window.CONFIG.MODEL_CAPABILITIES['default'] || { attachments: false, images: false };
         }
-    } catch (e) {}
+    } catch (e) { }
     return { attachments: false, images: false };
 }
 
